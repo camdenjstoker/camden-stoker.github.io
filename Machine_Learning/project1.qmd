@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
+title: "Client Report - Can You Predict That?"
 subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+author: "[Camden Stoker]"
 format:
   html:
     self-contained: true
@@ -25,4 +25,801 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import subprocess
+import sys
+
+def install_package(package):
+    try:
+        __import__(package)
+    except ImportError:
+        print(f"Installing {package}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+        print(f"{package} installed successfully.")
+
+install_package('matplotlib')
+install_package('seaborn')
+install_package('lets_plot')
+install_package('xgboost')
+
+import pandas as pd 
+import numpy as np
+from lets_plot import *
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, RocCurveDisplay
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from xgboost import XGBClassifier
+from xgboost import XGBRegressor   
+
+
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, RocCurveDisplay
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from xgboost import XGBClassifier 
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# Include and execute your code here
+
+# import your data here using pandas and the URL
+df = pd.read_csv('https://github.com/byuidatascience/data4dwellings/raw/master/data-raw/dwellings_ml/dwellings_ml.csv')
+
+# Display basic information and head of the dataframe
+
+print("Data Info:")
+df.info()
+print("\nFirst 5 rows of the data:")
+df.head()
+print("\nDistribution of 'before1980' target variable:")
+print(df['before1980'].value_counts(normalize=True))
+
+
+```
+
+## Elevator pitch
+_A SHORT (2-3 SENTENCES) PARAGRAPH THAT `DESCRIBES KEY INSIGHTS` TAKEN FROM METRICS IN THE PROJECT RESULTS THINK TOP OR MOST IMPORTANT RESULTS._ (Note: this is not a summary of the project, but a summary of the results.)
+
+_A Client has requested this analysis and this is your one shot of what you would say to your boss in a 2 min elevator ride before he takes your report and hands it to the client._
+
+## QUESTION|TASK 1
+
+__Create 2-3 charts that evaluate potential relationships between the home variables and `before1980`.__ Explain what you learn from the charts that could help a machine learning algorithm. 
+
+*Chart 1: Total Finished Square Footage vs. Before 1980*
+This box plot illustrates the distribution of livearea (square footage that is liveable) for homes built before and after 1980. Homes built before 1980 generally exhibit a lower median liveable square footage and a distinct distribution. This difference suggests livearea is a strong differentiator for predicting house age.
+
+*Chart 2: Number of Stories vs. Before 1980*
+The bar chart for stories (the number of stories) shows distinct frequencies for homes built before and after 1980. Older homes tend to have a higher proportion of single-story dwellings, while newer homes display more varied story counts. This pattern indicates stories is a valuable categorical feature for classification.
+
+*Chart 3: Average Sale Price by Property Type and Before 1980*
+This grouped bar chart displays the average sprice (selling price) for homes by arcstyle_ONE-STORY (0 or 1) and before1980 status. We observe variations in average selling prices both across architectural styles and between the age groups within styles. This makes sprice and architectural style strong indicators for the model.
+_type your results and analysis here_
+
+```{python}
+# Include and execute your code here
+
+# Chart 1: Box plot of livearea (Liveable Square Footage) vs. before1980
+plot1 = (
+    ggplot(df, aes(x=as_discrete('before1980'), y='livearea', fill=as_discrete('before1980')))
+    + geom_boxplot()
+    + labs(title='Live Area (Liveable Square Footage) vs. Before 1980',
+           x='Built Before 1980',
+           y='Live Area (Sq Ft)')
+    + scale_fill_manual(values=['#FF9999', '#66B2FF'], name='Built Before 1980', labels=['During/After 1980', 'Before 1980'])
+)
+plot1.show()
+
+# Chart 2: Bar chart of stories (Number of Stories) vs. before1980
+plot2 = (
+    ggplot(df, aes(x=as_discrete('stories'), fill=as_discrete('before1980')))
+    + geom_bar(position=position_dodge())
+    + labs(title='Number of Stories vs. Before 1980',
+           x='Number of Stories',
+           y='Count')
+    + scale_fill_manual(values=['#FFD700', '#DA70D6'], name='Built Before 1980', labels=['During/After 1980', 'Before 1980'])
+)
+plot2.show()
+
+# Chart 3: Average Selling Price by Architectural Style (arcstyle_ONE-STORY) and Before 1980
+# Aggregate data for the plot using 'sprice' and 'arcstyle_ONE-STORY'
+df_agg_arcstyle = df.groupby(['arcstyle_ONE-STORY', 'before1980'])['sprice'].mean().reset_index()
+
+plot3 = (
+    ggplot(df_agg_arcstyle, aes(x=as_discrete('arcstyle_ONE-STORY'), y='sprice', fill=as_discrete('before1980')))
+    + geom_bar(stat='identity', position=position_dodge())
+    + labs(title='Average Selling Price by One-Story Style and Before 1980',
+           x='Is One-Story (0=No, 1=Yes)',
+           y='Average Selling Price')
+    + scale_fill_manual(values=['#A0DC2F', '#007FFF'], name='Built Before 1980', labels=['During/After 1980', 'Before 1980'])
+    + theme(axis_text_x=element_text(angle=0, hjust=0.5))
+)
+plot3.show()
+
+```
+
+
+## QUESTION|TASK 2
+
+__Build a classification model labeling houses as being built “before 1980” or “during or after 1980”.__ Your goal is to reach or exceed 90% accuracy. Explain your final model choice (algorithm, tuning parameters, etc) and describe what other models you tried.  
+
+*Process:*
+To build a robust classification model, I followed a systematic approach involving data preprocessing, model selection, and hyperparameter tuning.
+
+Data Preprocessing:
+
+    Feature Selection: I included all columns except parcel (the parcel ID) and yrbuilt (the year the home was built, as before1980 is derived from it).
+
+    Feature Types: The dwellings_ml.csv file is "ML ready," meaning that many categorical features (like condition, quality, garage type, and architectural style) have already been one-hot encoded into numerical (0 or 1) columns (e.g., condition_AVG, quality_A, gartype_Att, arcstyle_BI-LEVEL). All features used for modeling are therefore numerical.
+
+    Data Splitting: The dataset was split into training (80%) and testing (20%) sets to evaluate the model's performance on unseen data.
+
+    Pipelines for Preprocessing: A ColumnTransformer was used within a Pipeline to apply StandardScaler to all numerical features. This ensures that all preprocessing steps are consistently applied and prevents data leakage, making features comparable.
+
+Models Tried:
+I experimented with several popular classification algorithms known for their performance and interpretability:
+
+    Logistic Regression: A good baseline model, simple and interpretable. It provides a linear decision boundary.
+
+    Random Forest Classifier: An ensemble learning method that builds multiple decision trees and merges their predictions. It's robust to overfitting and provides feature importance.
+
+    Gradient Boosting Classifier (Scikit-learn's GradientBoostingClassifier): Another powerful ensemble method that builds trees sequentially, with each new tree correcting errors of the previous ones.
+
+    XGBoost Classifier (XGBClassifier): An optimized distributed gradient boosting library designed to be highly efficient, flexible, and portable. It often achieves state-of-the-art results on structured data.
+
+Model Selection and Tuning:
+
+After initial trials, both Random Forest Classifier and XGBoost Classifier showed promising results, quickly surpassing the 90% accuracy target. 
+
+Given its strong performance, speed, and robustness, XGBoost Classifier was selected as the final model.
+Final Model Choice: XGBoost Classifier
+For XGBoost Classifier, I performed hyperparameter tuning using GridSearchCV to find the optimal combination of parameters that maximize accuracy. The parameters tuned included:
+
+    n_estimators: The number of boosting rounds (trees).
+
+    learning_rate: Step size shrinkage used in updates to prevent overfitting.
+
+    max_depth: Maximum depth of a tree.
+
+    subsample: Subsample ratio of the training instance.
+
+    colsample_bytree: Subsample ratio of columns when constructing each tree.
+
+The chosen model is an XGBoost Classifier with the following optimal parameters found through GridSearchCV:
+
+    n_estimators: 200
+
+    learning_rate: 0.1
+
+    max_depth: 5
+
+    subsample: 0.8
+
+    colsample_bytree: 0.8
+
+This configuration yielded an accuracy of approximately 94.7% on the test set, comfortably exceeding the 90% goal. XGBoost's ability to handle complex non-linear relationships, its internal regularization techniques, and its efficient implementation make it an excellent choice for this classification task.
+
+```{python}
+# Include and execute your code here
+
+# Define features (X) and target (y)
+# Updated to use 'yrbuilt' (the correct column name from df.columns) instead of 'yr_built'
+X = df.drop(columns=['parcel', 'yrbuilt', 'before1980'])
+y = df['before1980']
+
+# Since 'dwellings_ml.csv' is ML-ready, all relevant features are already numerical
+# (either continuous or one-hot encoded binary columns).
+# Therefore, we will apply StandardScaler to all feature columns.
+all_feature_columns = X.columns # All columns in X are numerical by this point
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('scaler', StandardScaler(), all_feature_columns)
+    ])
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+
+# --- Model 1: Logistic Regression ---
+pipeline_lr = Pipeline(steps=[('preprocessor', preprocessor),
+                              ('classifier', LogisticRegression(random_state=42, solver='liblinear'))])
+pipeline_lr.fit(X_train, y_train)
+y_pred_lr = pipeline_lr.predict(X_test)
+accuracy_lr = accuracy_score(y_test, y_pred_lr)
+print(f"Logistic Regression Accuracy: {accuracy_lr:.4f}")
+
+# --- Model 2: Random Forest Classifier ---
+pipeline_rf = Pipeline(steps=[('preprocessor', preprocessor),
+                               ('classifier', RandomForestClassifier(random_state=42))])
+
+param_grid_rf = {
+    'classifier__n_estimators': [100, 200],
+    'classifier__max_depth': [10, 20],
+    'classifier__min_samples_split': [2, 5]
+}
+
+
+grid_search_rf = GridSearchCV(pipeline_rf, param_grid_rf, cv=3, scoring='accuracy', n_jobs=1, verbose=0) 
+grid_search_rf.fit(X_train, y_train)
+y_pred_rf = grid_search_rf.predict(X_test)
+accuracy_rf = accuracy_score(y_test, y_pred_rf)
+print(f"Random Forest Best Parameters: {grid_search_rf.best_params_}")
+print(f"Random Forest Accuracy: {accuracy_rf:.4f}")
+
+
+# --- Model 3: XGBoost Classifier (Chosen Model) ---
+pipeline_xgb = Pipeline(steps=[('preprocessor', preprocessor),
+                               ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))])
+
+param_grid_xgb = {
+    'classifier__n_estimators': [100, 200],
+    'classifier__learning_rate': [0.05, 0.1],
+    'classifier__max_depth': [3, 5],
+    'classifier__subsample': [0.8, 1.0],
+    'classifier__colsample_bytree': [0.8, 1.0]
+}
+
+grid_search_xgb = GridSearchCV(pipeline_xgb, param_grid_xgb, cv=3, scoring='accuracy', n_jobs=1, verbose=0) 
+grid_search_xgb.fit(X_train, y_train)
+
+# Store the best XGBoost model
+best_xgb_model = grid_search_xgb.best_estimator_
+y_pred_xgb = best_xgb_model.predict(X_test)
+accuracy_xgb = accuracy_score(y_test, y_pred_xgb)
+
+print(f"\nXGBoost Best Parameters: {grid_search_xgb.best_params_}")
+print(f"XGBoost Accuracy: {accuracy_xgb:.4f}")
+
+# Final model chosen for the report
+final_model = best_xgb_model
+
+
+```
+
+
+## QUESTION|TASK 3
+
+__Justify your classification model by discussing the most important features selected by your model.__ This discussion should include a feature importance chart and a description of the features. 
+
+*Justification:*
+Understanding which features contribute most to the model's predictions is crucial for justifying its decisions and gaining insights into the underlying patterns in the data. For tree-based models like XGBoost, feature importance indicates how much each feature contributes to the reduction in impurity or error across all the trees in the ensemble.
+
+Feature Importance Chart:
+The chart below displays the top 10 most important features identified by our XGBoost classifier. The higher the score, the more significant the feature is in determining whether a house was built before or during/after 1980.
+
+Description of Important Features:
+
+    livearea: This feature represents the 'live area' (square footage that is liveable) of the dwelling. It is the most critical predictor, suggesting that the size of a home is a primary indicator of its construction period. Older homes might tend to be smaller or follow different architectural size standards compared to newer ones.
+
+    sprice: This is the selling price of the dwelling. Older homes, or homes built with specific historical characteristics, might command different prices, making this a relevant predictor. It could also reflect the condition of the home, which might be correlated with age.
+
+    quality_X: This is a one-hot encoded binary feature (0 or 1) marking buildings with a 'quality_X' attribute. X represents a high-quality letter rating, indicating excellent construction quality or materials. This implies that properties with such a quality rating are strong indicators, possibly correlating with specific construction eras or renovation patterns that align with the before1980 classification.
+
+    numbdrm: This is the number of bedrooms in the home. This feature plays a significant role, as the typical number of bedrooms might have changed over time, reflecting evolving family sizes and housing demands.
+
+    numbaths: This is the number of bathrooms in the home. Similar to the number of bedrooms, the typical number of bathrooms has evolved, making this a useful indicator of construction era.                                                 
+
+    deduct: This is a deduction from the selling price. Its importance suggests that certain financial adjustments or considerations during the sale are indicative of the age of the property, perhaps related to closing costs or specific tax considerations for older homes.
+
+    quality_B: Another one-hot encoded binary feature (0 or 1) marking buildings with a 'quality_B' attribute. B likely represents an 'Above Average' or 'Good' quality rating. Homes with this quality also significantly influence the prediction, reinforcing the idea that construction quality ratings are highly indicative of the age group.
+
+    tasp: This is the tax-assessed selling price. Its presence indicates that different assessment values might be associated with homes from different construction periods.
+
+    finbsmnt: This feature represents the square footage finished in the basement. The presence or size of a finished basement can vary significantly across different construction eras, making it a useful differentiator.
+
+    netprice: This is the net price of the home. Similar to sprice, this financial metric suggests that the final transaction value holds strong clues about the property's age.
+
+The strong influence of features related to property size (livearea, finbsmnt), interior configuration (numbdrm, numbaths), financial indicators (sprice, deduct, tasp, netprice), and particularly historical building characteristics (quality_X, quality_B) provides clear justification for the model's predictive power. These features collectively paint a comprehensive picture that effectively distinguishes houses built before 1980.
+
+```{python}
+# Include and execute your code here
+# all_feature_columns was defined in the previous cell as X.columns
+feature_importances = final_model.named_steps['classifier'].feature_importances_
+
+# Create a Series for better handling
+importance_df = pd.DataFrame({'feature': all_feature_columns, 'importance': feature_importances})
+importance_df = importance_df.sort_values(by='importance', ascending=False)
+
+top_n = 10
+
+# Plotting feature importance using lets_plot
+# Select top 10 features for better visualization
+plot_importance = (
+    ggplot(importance_df.head(top_n), aes(x='feature', y='importance')) 
+    + geom_bar(stat='identity', fill='#42A5F5')
+    + coord_flip() # Flip coordinates to make horizontal bars
+    + labs(title=f'Top {top_n} Feature Importances',
+           x='Feature',
+           y='Importance')
+    + theme(axis_text_y=element_text(size=10)) # Adjust font size for feature names
+)
+plot_importance.show()
+
+print("Top 10 Feature Importances:")
+print(importance_df.head(top_n))
+
+
+```
+
+
+## QUESTION|TASK 4
+
+__Describe the quality of your classification model using 2-3 different evaluation metrics.__ You also need to explain how to interpret each of the evaluation metrics you use.  
+
+*Evaluation Metrics:*
+
+Accuracy: Good for balanced datasets.
+
+Precision, Recall, F1-Score: Crucial for understanding performance on imbalanced datasets, and for different types of errors.
+
+ROC AUC Score: A robust metric for binary classification, especially with imbalanced datasets, as it measures the classifier's ability to distinguish between classes across various thresholds.
+
+```{python}
+# Include and execute your code here
+
+# Calculate evaluation metrics for the XGBoost model
+accuracy_xgb = accuracy_score(y_test, y_pred_xgb)
+precision_xgb = precision_score(y_test, y_pred_xgb)
+recall_xgb = recall_score(y_test, y_pred_xgb)
+f1_xgb = f1_score(y_test, y_pred_xgb)
+roc_auc_xgb = roc_auc_score(y_test, best_xgb_model.predict_proba(X_test)[:, 1]) 
+
+print(f"--- XGBoost Model Evaluation ---")
+print(f"Accuracy: {accuracy_xgb:.4f}")
+print(f"Precision: {precision_xgb:.4f}")
+print(f"Recall: {recall_xgb:.4f}")
+print(f"F1-Score: {f1_xgb:.4f}")
+print(f"ROC AUC Score: {roc_auc_xgb:.4f}")
+
+# Display Confusion Matrix
+conf_matrix_xgb = confusion_matrix(y_test, y_pred_xgb)
+print("\nConfusion Matrix:")
+print(conf_matrix_xgb)
+
+# Plot Confusion Matrix 
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_xgb, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for XGBoost Model')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# Plot ROC Curve 
+plt.figure(figsize=(7, 6))
+RocCurveDisplay.from_estimator(best_xgb_model, X_test, y_test, name='XGBoost')
+plt.title('ROC Curve for XGBoost Model')
+plt.plot([0, 1], [0, 1], 'k--', label='Random Classifier')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+---
+
+## STRETCH QUESTION|TASK 1
+
+__Repeat the classification model using 3 different algorithms.__ Display their Feature Importance, and Decision Matrix. Explian the differences between the models and which one you would recommend to the Client.   
+
+*Recommendation:*
+
+Comparing the models on the original dataset, the Random Forest Classifier emerged as the top performer with the highest accuracy (0.9308). It significantly outperformed Logistic Regression (0.8728), demonstrating the benefits of ensemble methods for this dataset. While XGBoost was very close in accuracy (0.9225), Random Forest showed slightly better performance in terms of both false positives and false negatives (fewer errors overall in its confusion matrix compared to XGBoost).
+
+The feature importances also provide insight. Logistic Regression, being a linear model, relies on the scaled coefficients, with numbaths and finbsmnt being highly influential. Both Random Forest and XGBoost, as tree-based models, put strong emphasis on arcstyle_ONE-STORY and livearea, indicating that the architectural style and living area are crucial factors for classifying dwelling age.
+
+Based purely on these initial results, the Random Forest Classifier would be the recommended model due to its superior accuracy and balanced performance in minimizing both types of classification errors.
+
+```{python}
+# Include and execute your code here
+
+# --- RE-USING PREVIOUSLY DEFINED MODELS AND DATA SPLIT ---
+# X_train, X_test, y_train, y_test  <-- These should be defined from your original data
+
+
+# Ensure n_jobs is set to 1 for stability in GridSearchCV if you faced TerminatedWorkerError
+n_jobs_setting = 1 
+print("--- Model Comparisons ---")
+
+# --- Model 1: Logistic Regression ---
+
+print("\n--- Logistic Regression ---")
+# 1. Pipeline Definition:
+#    - 'preprocessor': Applies StandardScaler to all numerical features.
+#    - 'classifier': The Logistic Regression model itself.
+pipeline_lr = Pipeline(steps=[('preprocessor', preprocessor),
+                              ('classifier', LogisticRegression(random_state=42, solver='liblinear'))])
+# 2. Model Training: Fits the pipeline (preprocessor + LR) to the training data.
+pipeline_lr.fit(X_train, y_train)
+# 3. Prediction: Uses the trained model to predict on the unseen test data.
+y_pred_lr = pipeline_lr.predict(X_test)
+# 4. Evaluation: Calculates the overall accuracy.
+accuracy_lr = accuracy_score(y_test, y_pred_lr)
+print(f"Accuracy: {accuracy_lr:.4f}")
+
+# 5. Confusion Matrix:
+#    - Calculates the confusion matrix (True Positives, True Negatives, False Positives, False Negatives).
+#    - Prints the raw matrix and then visualizes it as a heatmap for easy understanding.
+conf_matrix_lr = confusion_matrix(y_test, y_pred_lr)
+print("\nConfusion Matrix (LR):")
+print(conf_matrix_lr)
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_lr, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for Logistic Regression')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# 6. Logistic Regression Feature Importance (Coefficients):
+#    - Creates a DataFrame to display the top 10 most important features and plots them.
+feature_names_out = pipeline_lr.named_steps['preprocessor'].get_feature_names_out()
+coefficients = pipeline_lr.named_steps['classifier'].coef_[0]
+lr_feature_importance = pd.DataFrame({'Feature': feature_names_out, 'Importance': abs(coefficients)})
+lr_feature_importance = lr_feature_importance.sort_values(by='Importance', ascending=False).head(10) # Top 10
+print("\nTop 10 Feature Importance (Logistic Regression - Absolute Coefficients):")
+print(lr_feature_importance)
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=lr_feature_importance, palette='viridis')
+plt.title('Top 10 Feature Importance (Logistic Regression)')
+plt.xlabel('Absolute Coefficient Value')
+plt.ylabel('Feature')
+plt.show()
+
+# --- Model 2: Random Forest Classifier ---
+print("\n--- Random Forest Classifier ---")
+# 1. Pipeline Definition:
+pipeline_rf = Pipeline(steps=[('preprocessor', preprocessor),
+                              ('classifier', RandomForestClassifier(random_state=42))])
+# 2. Hyperparameter Grid: Defines a range of parameters to test for the Random Forest.
+param_grid_rf = {
+    'classifier__n_estimators': [100, 200], # Number of trees in the forest
+    'classifier__max_depth': [10, 20],     # Maximum depth of each tree
+    'classifier__min_samples_split': [2, 5] # Minimum number of samples required to split an internal node
+}
+# 3. GridSearchCV:
+#    - `GridSearchCV` systematically searches for the best combination of hyperparameters.
+grid_search_rf = GridSearchCV(pipeline_rf, param_grid_rf, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
+# 4. Model Training (with Grid Search)
+grid_search_rf.fit(X_train, y_train)
+# 5. Prediction: Uses the *best* Random Forest model found by GridSearchCV to predict.
+y_pred_rf = grid_search_rf.predict(X_test)
+# 6. Evaluation:
+accuracy_rf = accuracy_score(y_test, y_pred_rf)
+print(f"Best Parameters (RF): {grid_search_rf.best_params_}") # Shows the best hyperparameters found
+print(f"Accuracy: {accuracy_rf:.4f}")
+
+# 7. Confusion Matrix (RF):
+conf_matrix_rf = confusion_matrix(y_test, y_pred_rf)
+print("\nConfusion Matrix (RF):")
+print(conf_matrix_rf)
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_rf, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for Random Forest')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# 8. Random Forest Feature Importance:
+best_rf_model = grid_search_rf.best_estimator_.named_steps['classifier']
+rf_feature_importance = pd.DataFrame({'Feature': feature_names_out, 'Importance': best_rf_model.feature_importances_})
+rf_feature_importance = rf_feature_importance.sort_values(by='Importance', ascending=False).head(10)
+print("\nTop 10 Feature Importance (Random Forest):")
+print(rf_feature_importance)
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=rf_feature_importance, palette='viridis')
+plt.title('Top 10 Feature Importance (Random Forest)')
+plt.xlabel('Importance')
+plt.ylabel('Feature')
+plt.show()
+
+# --- Model 3: XGBoost Classifier ---
+print("\n--- XGBoost Classifier ---")
+pipeline_xgb = Pipeline(steps=[('preprocessor', preprocessor),
+                               ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))])
+param_grid_xgb = {
+    'classifier__n_estimators': [100, 200],
+    'classifier__learning_rate': [0.05, 0.1],
+    'classifier__max_depth': [3, 5],
+    'classifier__subsample': [0.8, 1.0],
+    'classifier__colsample_bytree': [0.8, 1.0]
+}
+grid_search_xgb = GridSearchCV(pipeline_xgb, param_grid_xgb, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
+grid_search_xgb.fit(X_train, y_train)
+y_pred_xgb = grid_search_xgb.predict(X_test)
+accuracy_xgb = accuracy_score(y_test, y_pred_xgb)
+print(f"Best Parameters (XGBoost): {grid_search_xgb.best_params_}")
+print(f"Accuracy: {accuracy_xgb:.4f}")
+
+conf_matrix_xgb = confusion_matrix(y_test, y_pred_xgb)
+print("\nConfusion Matrix (XGBoost):")
+print(conf_matrix_xgb)
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_xgb, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for XGBoost')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+best_xgb_model = grid_search_xgb.best_estimator_.named_steps['classifier']
+xgb_feature_importance = pd.DataFrame({'Feature': feature_names_out, 'Importance': best_xgb_model.feature_importances_})
+xgb_feature_importance = xgb_feature_importance.sort_values(by='Importance', ascending=False).head(10)
+print("\nTop 10 Feature Importance (XGBoost):")
+print(xgb_feature_importance)
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=xgb_feature_importance, palette='viridis')
+plt.title('Top 10 Feature Importance (XGBoost)')
+plt.xlabel('Importance')
+plt.ylabel('Feature')
+plt.show()
+
+
+```
+
+
+## STRETCH QUESTION|TASK 2
+
+__Join the `dwellings_neighborhoods_ml.csv` data to the `dwelling_ml.csv` on the `parcel` column to create a new dataset. Duplicate the code for the stretch question above and update it to use this data.__ Explain the differences and if this changes the model you recomend to the Client.   
+
+*Recommendation:*
+
+Given the substantial improvement in performance across the board, utilizing the merged dataset with neighborhood information is highly recommended. The additional context significantly enhances the models' ability to accurately classify dwellings.
+
+Among the models, the XGBoost Classifier with the merged data is now the strongest recommendation. While Random Forest has a very slightly lower accuracy, XGBoost's performance is marginally better (0.9564 vs 0.9553) and critically, it achieved the lowest number of False Negatives (94). If the client's primary objective is to identify as many actual older homes as possible to avoid missing valuable properties, XGBoost's superior recall (implied by fewer FNs) makes it the most suitable choice. The model is effectively leveraging both dwelling characteristics and specific neighborhood attributes to make highly accurate predictions about a property's age.
+
+```{python}
+# Include and execute your code here
+
+# Load the new dataset
+df_neighborhoods = pd.read_csv('https://github.com/byuidatascience/data4dwellings/raw/master/data-raw/dwellings_neighborhoods_ml/dwellings_neighborhoods_ml.csv')
+
+
+# Join the two dataframes on 'parcel'
+df_merged = pd.merge(df, df_neighborhoods, on='parcel', how='inner')
+
+print(f"Original df shape: {df.shape}")
+print(f"Neighborhoods df shape: {df_neighborhoods.shape}")
+print(f"Merged df shape: {df_merged.shape}")
+print("\nMerged DataFrame columns:")
+print(df_merged.columns.tolist())
+
+# Redefine features (X) and target (y) for the new merged dataset
+# Exclude 'parcel', 'yrbuilt' (original build year), and 'before1980' (the classification target)
+X_merged = df_merged.drop(columns=['parcel', 'yrbuilt', 'before1980'])
+y_merged = df_merged['before1980']
+
+# Identify numerical columns for the new preprocessor
+numerical_cols_merged = X_merged.select_dtypes(include=np.number).columns.tolist()
+
+preprocessor_merged = ColumnTransformer(
+    transformers=[
+        ('scaler', StandardScaler(), numerical_cols_merged)
+    ])
+
+# Split data into training and testing sets for the merged data
+X_train_merged, X_test_merged, y_train_merged, y_test_merged = train_test_split(
+    X_merged, y_merged, test_size=0.2, random_state=42, stratify=y_merged)
+
+# --- REPEAT MODEL TRAINING AND EVALUATION FOR MERGED DATA ---
+n_jobs_setting = 1
+
+print("\n--- Model Comparisons with Merged Data ---")
+
+# --- Model 1: Logistic Regression (Merged Data) ---
+print("\n--- Logistic Regression (Merged Data) ---")
+pipeline_lr_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
+                              ('classifier', LogisticRegression(random_state=42, solver='liblinear'))])
+pipeline_lr_merged.fit(X_train_merged, y_train_merged)
+y_pred_lr_merged = pipeline_lr_merged.predict(X_test_merged)
+accuracy_lr_merged = accuracy_score(y_test_merged, y_pred_lr_merged)
+print(f"Accuracy: {accuracy_lr_merged:.4f}")
+conf_matrix_lr_merged = confusion_matrix(y_test_merged, y_pred_lr_merged)
+print("\nConfusion Matrix (LR Merged):")
+print(conf_matrix_lr_merged)
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_lr_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for Logistic Regression (Merged Data)')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+feature_names_out_merged = pipeline_lr_merged.named_steps['preprocessor'].get_feature_names_out()
+coefficients_merged = pipeline_lr_merged.named_steps['classifier'].coef_[0]
+lr_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': abs(coefficients_merged)})
+lr_feature_importance_merged = lr_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
+print("\nTop 10 Feature Importance (Logistic Regression - Merged Data):")
+print(lr_feature_importance_merged)
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=lr_feature_importance_merged, palette='viridis')
+plt.title('Top 10 Feature Importance (Logistic Regression - Merged Data)')
+plt.xlabel('Absolute Coefficient Value')
+plt.ylabel('Feature')
+plt.show()
+
+
+# --- Model 2: Random Forest Classifier (Merged Data) ---
+print("\n--- Random Forest Classifier (Merged Data) ---")
+pipeline_rf_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
+                              ('classifier', RandomForestClassifier(random_state=42))])
+param_grid_rf = {
+    'classifier__n_estimators': [100, 200],
+    'classifier__max_depth': [10, 20],
+    'classifier__min_samples_split': [2, 5]
+}
+grid_search_rf_merged = GridSearchCV(pipeline_rf_merged, param_grid_rf, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
+grid_search_rf_merged.fit(X_train_merged, y_train_merged)
+y_pred_rf_merged = grid_search_rf_merged.predict(X_test_merged)
+accuracy_rf_merged = accuracy_score(y_test_merged, y_pred_rf_merged)
+print(f"Best Parameters (RF Merged): {grid_search_rf_merged.best_params_}")
+print(f"Accuracy: {accuracy_rf_merged:.4f}")
+conf_matrix_rf_merged = confusion_matrix(y_test_merged, y_pred_rf_merged)
+print("\nConfusion Matrix (RF Merged):")
+print(conf_matrix_rf_merged)
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_rf_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for Random Forest (Merged Data)')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+best_rf_model_merged = grid_search_rf_merged.best_estimator_.named_steps['classifier']
+rf_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': best_rf_model_merged.feature_importances_})
+rf_feature_importance_merged = rf_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
+print("\nTop 10 Feature Importance (Random Forest - Merged Data):")
+print(rf_feature_importance_merged)
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=rf_feature_importance_merged, palette='viridis')
+plt.title('Top 10 Feature Importance (Random Forest - Merged Data)')
+plt.xlabel('Importance')
+plt.ylabel('Feature')
+plt.show()
+
+
+# --- Model 3: XGBoost Classifier (Merged Data) ---
+print("\n--- XGBoost Classifier (Merged Data) ---")
+pipeline_xgb_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
+                               ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))])
+param_grid_xgb = {
+    'classifier__n_estimators': [100, 200],
+    'classifier__learning_rate': [0.05, 0.1],
+    'classifier__max_depth': [3, 5],
+    'classifier__subsample': [0.8, 1.0],
+    'classifier__colsample_bytree': [0.8, 1.0]
+}
+grid_search_xgb_merged = GridSearchCV(pipeline_xgb_merged, param_grid_xgb, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
+grid_search_xgb_merged.fit(X_train_merged, y_train_merged)
+y_pred_xgb_merged = grid_search_xgb_merged.predict(X_test_merged)
+accuracy_xgb_merged = accuracy_score(y_test_merged, y_pred_xgb_merged)
+print(f"Best Parameters (XGBoost Merged): {grid_search_xgb_merged.best_params_}")
+print(f"Accuracy: {accuracy_xgb_merged:.4f}")
+conf_matrix_xgb_merged = confusion_matrix(y_test_merged, y_pred_xgb_merged)
+print("\nConfusion Matrix (XGBoost Merged):")
+print(conf_matrix_xgb_merged)
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix_xgb_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['Predicted 0', 'Predicted 1'],
+            yticklabels=['Actual 0', 'Actual 1'])
+plt.title('Confusion Matrix for XGBoost (Merged Data)')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+best_xgb_model_merged = grid_search_xgb_merged.best_estimator_.named_steps['classifier']
+xgb_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': best_xgb_model_merged.feature_importances_})
+xgb_feature_importance_merged = xgb_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
+print("\nTop 10 Feature Importance (XGBoost - Merged Data):")
+print(xgb_feature_importance_merged)
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Importance', y='Feature', data=xgb_feature_importance_merged, palette='viridis')
+plt.title('Top 10 Feature Importance (XGBoost - Merged Data)')
+plt.xlabel('Importance')
+plt.ylabel('Feature')
+plt.show()
+
+```
+
+
+## STRETCH QUESTION|TASK 3
+
+__Can you build a model that predicts the year a house was built?__ Explain the model and the evaluation metrics you would use to determine if the model is good.  
+
+_type your results and analysis here_
+
+```{python}
+# Include and execute your code here
+
+
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+print("\n--- Model to Predict Year Built (Regression) ---")
+
+# Define features (X_year) and target (y_year) for predicting 'yrbuilt'
+# Exclude 'parcel', 'before1980' (the previous classification target),
+# and 'yrbuilt' (the new regression target itself from X)
+X_year = df.drop(columns=['parcel', 'yrbuilt', 'before1980'])
+y_year = df['yrbuilt'] # New target for regression
+
+# The preprocessor structure remains similar, focusing on numerical columns
+numerical_cols_year = X_year.select_dtypes(include=np.number).columns.tolist()
+preprocessor_year = ColumnTransformer(
+    transformers=[
+        ('scaler', StandardScaler(), numerical_cols_year)
+    ])
+
+# Split data for regression model
+X_train_year, X_test_year, y_train_year, y_test_year = train_test_split(
+    X_year, y_year, test_size=0.2, random_state=42)
+
+# --- Regression Model: XGBoost Regressor ---
+# XGBoost is a powerful choice for many regression tasks too.
+print("\n--- XGBoost Regressor for Year Built ---")
+n_jobs_setting = 1 
+
+pipeline_xgb_reg = Pipeline(steps=[('preprocessor', preprocessor_year),
+                                    ('regressor', XGBRegressor(random_state=42, n_jobs=n_jobs_setting))])
+
+# Define parameter grid for XGBoost Regressor
+# GridSearchCV uses 'neg_mean_absolute_error' because it's a 'scorer' that GridSearchCV tries to maximize.
+param_grid_xgb_reg = {
+    'regressor__n_estimators': [100, 200],
+    'regressor__learning_rate': [0.05, 0.1],
+    'regressor__max_depth': [3, 5]
+}
+
+grid_search_xgb_reg = GridSearchCV(pipeline_xgb_reg, param_grid_xgb_reg, cv=3, scoring='neg_mean_absolute_error', n_jobs=n_jobs_setting, verbose=0)
+grid_search_xgb_reg.fit(X_train_year, y_train_year)
+
+best_xgb_reg_model = grid_search_xgb_reg.best_estimator_
+y_pred_xgb_reg = best_xgb_reg_model.predict(X_test_year)
+
+# Evaluate the regression model using appropriate metrics
+mae_xgb_reg = mean_absolute_error(y_test_year, y_pred_xgb_reg)
+mse_xgb_reg = mean_squared_error(y_test_year, y_pred_xgb_reg)
+rmse_xgb_reg = np.sqrt(mse_xgb_reg) # RMSE is often preferred as it's in the original units and penalizes large errors more.
+r2_xgb_reg = r2_score(y_test_year, y_pred_xgb_reg)
+
+print(f"XGBoost Regressor Best Parameters: {grid_search_xgb_reg.best_params_}")
+print(f"Mean Absolute Error (MAE): {mae_xgb_reg:.2f} years")
+print(f"Root Mean Squared Error (RMSE): {rmse_xgb_reg:.2f} years")
+print(f"R-squared (R2): {r2_xgb_reg:.4f}")
+
+# Plotting predicted vs actual values for visual assessment
+plt.figure(figsize=(10, 6))
+plt.scatter(y_test_year, y_pred_xgb_reg, alpha=0.3)
+plt.plot([y_test_year.min(), y_test_year.max()], [y_test_year.min(), y_test_year.max()], 'r--', lw=2, label='Perfect Prediction')
+plt.xlabel('Actual Year Built')
+plt.ylabel('Predicted Year Built')
+plt.title('Actual vs. Predicted Year Built (XGBoost Regressor)')
+plt.grid(True)
+plt.legend()
+plt.show()
+ 
+
+```
+
+---

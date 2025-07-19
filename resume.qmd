@@ -1,87 +1,57 @@
 ---
 layout: cv
-title: Isaac Newtons's CV
+title: Camden Stoker's Resume
 ---
-# Isaac Newton
-Physicist, Mathematician, Cambridge professor.
+# Camden J. Stoker
+(509) 714-8210 
 
 <div id="webaddress">
-<a href="isaac@applesdofall.org">isaac@applesdofall.org</a>
-| <a href="http://en.wikipedia.org/wiki/Isaac_Newton">My wikipedia page</a>
+<a href="stokercamden@gmail.com">stokercamden@gmail.com</a>
+| <a href="www.linkedin.com/in/camden-stoker-089384332">My Linkedin Page</a>
 </div>
 
 
-## Currently
-
-Standing on the shoulders of giants
-
-### Specialized in
-
-Laws of motion, gravitation, minting coins, disliking [Robert Hooke](http://en.wikipedia.org/wiki/Robert_Hooke)
-
-
-### Research interests
-
-Cooling, power series, optics, alchemy, planetary motions, apples.
-
-
 ## Education
+**Brigham Young University - Idaho** | Rexburg, ID
+Bachelor of Data Science | Minor: Business Financial Analysis
+[cite_start]September 2024 - Present [cite: 1, 2]
 
-`1654-1660`
-__The King's School, Grantham.__
+## Experience
+### High Country Automotive
+Warehouse Hand | Lewiston, ID | [cite_start]August 2024 - September 2024 [cite: 3]
+* [cite_start]Automotive Parts delivery and supplier [cite: 3]
+* [cite_start]Processed efficiently and managed online and phone orders, ensuring timely and accurate delivery, enhancing order times by 40%. [cite: 3, 4]
+* [cite_start]Coordinated and reviewed order deliveries to maintain high-quality service, which in turn brought more customers to doors by 25%. [cite: 4, 5]
+* [cite_start]Streamlined stock management processes, resulting in improved inventory accuracy by 60%. [cite: 5]
+* [cite_start]Collaborated with customers to identify needs and recommend suitable products, enhancing customer satisfaction, allowing networking with local shops looking to grow business by over 50%. [cite: 6, 7]
 
-`June 1661 - now`
-__Trinity College, Cambridge__
-
-- Sizar
-
-`1667 - death`
-__Trinity College, Cambridge__
-
-- Fellow
-
-
+### Church of Jesus Christ of Latter-Day Saints
+Missionary | St. George, UT | [cite_start]August 2022 - August 2024 [cite: 8]
+* [cite_start]Served the Spanish speaking people in area, taught lessons about the Gospel of Jesus Christ, helped people better lives through Jesus Christ. [cite: 8]
+* [cite_start]Led with other people with same goals and intentions, headed some projects with Google Sheets and some programming specifically dealing with Python and sheet organization. [cite: 8]
 
 ## Awards
+* Eagle Scout with Bronze Palm
+* Colonel as Group Commander for Air Force JROTC
 
-`2012`
-President, *Royal Society*, London, UK
+## Key Projects
+### Clearview Project (Data Science Society)
+Rexburg, ID | [cite_start]October 2024 - April 2025 [cite: 9]
+* [cite_start]Built a database and will manage large amounts of data. [cite: 9]
+* [cite_start]Leveraged database and connections through JavaScript to make a functional website. [cite: 9]
+* [cite_start]Finished and presented project as a team member, using PostgreSQL, JavaScript, HTML. [cite: 9]
 
-Associate, *French Academy of Science*, Paris, France
-
-
-
-## Publications
-
-<!-- A list is also available [online](http://scholar.google.co.uk/citations?user=LTOTl0YAAAAJ) -->
-
-### Journals
-
-`1669`
-Newton Sir I, De analysi per æquationes numero terminorum infinitas. 
-
-`1669`
-Lectiones opticæ.
-
-etc. etc. etc.
-
-### Patents
-
-`2012`
-Infinitesimal calculus for solutions to physics problems, [SMBC](http://www.techdirt.com/articles/20121011/09312820678/if-patents-had-been-around-time-newton.shtml) patent 001
+### Property Office Project (Data Science Society)
+Rexburg, ID | [cite_start]October 2024 - Present [cite: 9]
+* [cite_start]Built a database and will manage large amounts of data. [cite: 9]
+* [cite_start]Cleansed the data and also went in starting insert statements. [cite: 9]
 
 
-## Occupation
-
-`1600`
-__Royal Mint__, London
-
-- Warden
-- Minted coins
-
-`1600`
-__Lucasian professor of Mathematics__, Cambridge University
-
+### Trail Restoration (Boy Scouts of America)
+Lewiston, ID | [cite_start]September 2018 - February 2019 [cite: 10]
+* [cite_start]Outlined plans of whole project, found sponsors for funds, obtained materials needed, spoke with community members in public meetings. [cite: 10]
+* [cite_start]Arranged for help on specific days and times, planted and controlled seed planted for breeding ground. [cite: 10]
+* [cite_start]Improved land by 80% and doubled breeding of animals. [cite: 11]
 
 
 <!-- ### Footer
