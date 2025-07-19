@@ -1,10 +1,23 @@
 ---
 title: "about me"
 subtitle: "my data science portfolio"
-# use quarto markdown to 
+
+
 ---
 
-# Title 1 Header
-## Title 2 Header
+# Hello! I'm Camden J. Stoker.
 
-[MarkDown Basics](https://quarto.org/docs/authoring/markdown-basics.html#links-images)
+Welcome to my personal portfolio website! Here you'll find a showcase of my skills, projects, and professional experience in data science.
+
+## About Me
+
+[cite_start]I am currently pursuing a Bachelor of Data Science with a minor in Business Financial Analysis at Brigham Young University - Idaho[cite: 1, 2]. I'm passionate about leveraging data to solve real-world problems and create impactful solutions. My experience includes hands-on work with data management, programming, and project leadership.
+
+## My Resume
+
+For a detailed look at my qualifications and professional journey, please navigate to the resume tab.
+
+## My Projects
+
+For more detailed looks at some of my showcase projects please navigate through the project themes and diferent project within those themes.
+
