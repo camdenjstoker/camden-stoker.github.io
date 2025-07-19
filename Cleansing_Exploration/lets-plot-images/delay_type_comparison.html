@@ -1,0 +1,143 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.6.2/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;RFzDgk&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;RFzDgk&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;data&quot;:{
+&quot;Origin&quot;:[&quot;ATL&quot;,&quot;DEN&quot;,&quot;IAD&quot;,&quot;ORD&quot;,&quot;SAN&quot;,&quot;SFO&quot;,&quot;SLC&quot;,&quot;ATL&quot;,&quot;DEN&quot;,&quot;IAD&quot;,&quot;ORD&quot;,&quot;SAN&quot;,&quot;SFO&quot;,&quot;SLC&quot;,&quot;ATL&quot;,&quot;DEN&quot;,&quot;IAD&quot;,&quot;ORD&quot;,&quot;SAN&quot;,&quot;SFO&quot;,&quot;SLC&quot;],
+&quot;DelayType&quot;:[&quot;Carrier Delay&quot;,&quot;Carrier Delay&quot;,&quot;Carrier Delay&quot;,&quot;Carrier Delay&quot;,&quot;Carrier Delay&quot;,&quot;Carrier Delay&quot;,&quot;Carrier Delay&quot;,&quot;Security Delay&quot;,&quot;Security Delay&quot;,&quot;Security Delay&quot;,&quot;Security Delay&quot;,&quot;Security Delay&quot;,&quot;Security Delay&quot;,&quot;Security Delay&quot;,&quot;Weather Delay&quot;,&quot;Weather Delay&quot;,&quot;Weather Delay&quot;,&quot;Weather Delay&quot;,&quot;Weather Delay&quot;,&quot;Weather Delay&quot;,&quot;Weather Delay&quot;],
+&quot;Proportion&quot;:[2.9119329885213408E-5,4.932429690999191E-5,1.3974172441287927E-4,3.53014297357007E-5,1.350965613567181E-4,7.786896553838418E-5,8.69327283195476E-5,2.9570792364053927E-5,5.171095643789474E-5,1.3269592318197778E-4,3.669124980403537E-5,1.4163349174494642E-4,8.093467284304499E-5,9.192067174771838E-5,2.8893598645793147E-5,5.0517626673943326E-5,1.5031042625923146E-4,3.53014297357007E-5,1.394545149488703E-4,7.725582407745203E-5,9.192067174771838E-5]
+},
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;Origin&quot;,
+&quot;y&quot;:&quot;Proportion&quot;,
+&quot;fill&quot;:&quot;DelayType&quot;
+},
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;Origin&quot;
+},{
+&quot;type&quot;:&quot;int&quot;,
+&quot;column&quot;:&quot;TotalFlights&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;DelayType&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;Proportion&quot;
+}]
+},
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;Proportion of Flights Delayed by Type at Each Airport&quot;
+},
+&quot;guides&quot;:{
+&quot;x&quot;:{
+&quot;title&quot;:&quot;Airport&quot;
+},
+&quot;y&quot;:{
+&quot;title&quot;:&quot;Proportion of Flights Delayed&quot;
+},
+&quot;fill&quot;:{
+&quot;title&quot;:&quot;Delay Type&quot;
+}
+},
+&quot;theme&quot;:{
+&quot;axis_text_x&quot;:{
+&quot;angle&quot;:45.0,
+&quot;hjust&quot;:1.0,
+&quot;blank&quot;:false
+}
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[],
+&quot;layers&quot;:[{
+&quot;geom&quot;:&quot;bar&quot;,
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;mapping&quot;:{
+},
+&quot;position&quot;:&quot;dodge&quot;,
+&quot;data_meta&quot;:{
+},
+&quot;data&quot;:{
+}
+}],
+&quot;metainfo_list&quot;:[],
+&quot;spec_id&quot;:&quot;8&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

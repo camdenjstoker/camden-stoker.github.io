@@ -594,6 +594,10 @@ Among the models, the XGBoost Classifier with the merged data is now the stronge
 # Load the new dataset
 df_neighborhoods = pd.read_csv('https://github.com/byuidatascience/data4dwellings/raw/master/data-raw/dwellings_neighborhoods_ml/dwellings_neighborhoods_ml.csv')
 
+for col in df_neighborhoods.select_dtypes(include=['int64']).columns:
+    df_neighborhoods[col] = pd.to_numeric(df_neighborhoods[col], downcast='integer')
+for col in df_neighborhoods.select_dtypes(include=['float64']).columns:
+    df_neighborhoods[col] = pd.to_numeric(df_neighborhoods[col], downcast='float')
 
 # Join the two dataframes on 'parcel'
 df_merged = pd.merge(df, df_neighborhoods, on='parcel', how='inner')
