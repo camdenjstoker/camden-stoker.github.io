@@ -25,8 +25,8 @@ website:
         file: resume.qmd
       - text: "Data Cleansing"
         file: cleansing.qmd
-      - text: "Data Exploration"
-        file: exploration.qmd
+      # - text: "Data Exploration"
+      #   file: exploration.qmd
       - text: "Story Telling"
         file: story_telling.qmd
       - text: "Machine Learning"
@@ -62,16 +62,16 @@ website:
         # - text: "Project 5"
         #   file: Cleansing_Projects/project5.qmd
         # - text: "---"
-    - title: "Data Exploration"
-      style: "docked"
-      background: light
-      contents:
-        - text: "Data Exploration"
-          file: exploration.qmd
-        - text: "---"
-        - text: "Project 1"
-          file: Exploration_Projects/project1.qmd
-        - text: "---"
+        # - title: "Data Exploration"
+        #   style: "docked"
+        #   background: light
+        #   contents:
+        #     - text: "Data Exploration"
+        #       file: exploration.qmd
+        #     - text: "---"
+        #     - text: "Project 1"
+        #       file: Exploration_Projects/project1.qmd
+        #     - text: "---"
         # - text: "Project 2"
         #   file: Exploration_Projects/project2.qmd
         # - text: "---"
