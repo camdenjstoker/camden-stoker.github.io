@@ -48,9 +48,9 @@ python-version: '3.12'
 
 #cache: 'pip'
 
-- run: pip install jupyter numpy pandas scikit-learn lets-plot palmerpenguins seaborn matplotlib plotly.express #altair altair_viewer # nbformat nbclient pyyaml
-
-#- run: pip install -r requirements.txt
+- run: pip install jupyter numpy pandas scikit-learn lets-plot palmerpenguins seaborn matplotlib plotly.express altair altair_viewer  nbformat nbclient pyyaml
+- run: pip install -r requirements.txt
+- run: pip install tabulate
 
 
 # # Comment out the 2 below section if you are not using R
