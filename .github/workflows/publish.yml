@@ -32,6 +32,7 @@ jobs:
       - run: |
           pip install jupyter numpy pandas scikit-learn lets-plot palmerpenguins seaborn matplotlib plotly.express altair altair_viewer nbformat nbclient pyyaml tabulate # tabulate included here
           pip install -r requirements.txt # This should ideally be run before the above if requirements.txt lists most packages
+          pip install tabulate
                                            # Consider consolidating all pip installs or ensuring order for dependencies
 
       # # Comment out the 2 below section if you are not using R
