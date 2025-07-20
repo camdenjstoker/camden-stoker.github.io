@@ -106,16 +106,16 @@ website:
         # - text: "Project 5"
         #   file: Story_Telling/project5.qmd
         # - text: "---"
-    - title: "Machine Learning"
-      style: "docked"
-      background: light
-      contents:
-        - text: "Machine Learning"
-          file: ml.qmd
-        - text: "---"
-        - text: "Project 1"
-          file: Machine_Learning/project1.qmd
-        - text: "---"
+        # - title: "Machine Learning"
+        #   style: "docked"
+        #   background: light
+        #   contents:
+        #     - text: "Machine Learning"
+        #       file: ml.qmd
+        #     - text: "---"
+        #     - text: "Project 1"
+        #       file: Machine_Learning/project1.qmd
+        #     - text: "---"
         # - text: "Project 2"
         #   file: Machine_Learning/project2.qmd
         # - text: "---"

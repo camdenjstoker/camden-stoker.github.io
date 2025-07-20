@@ -1,4 +1,4 @@
----
+<!-- ---
 title: "Client Report - Can You Predict That?"
 subtitle: "Course DS 250"
 author: "[Camden Stoker]"
@@ -579,249 +579,249 @@ plt.show()
 
 
 ## STRETCH QUESTION|TASK 2
-
+<!--  -->
 __Join the `dwellings_neighborhoods_ml.csv` data to the `dwelling_ml.csv` on the `parcel` column to create a new dataset. Duplicate the code for the stretch question above and update it to use this data.__ Explain the differences and if this changes the model you recomend to the Client.   
 
 *Recommendation:*
 
 Given the substantial improvement in performance across the board, utilizing the merged dataset with neighborhood information is highly recommended. The additional context significantly enhances the models' ability to accurately classify dwellings.
 
-Among the models, the XGBoost Classifier with the merged data is now the strongest recommendation. While Random Forest has a very slightly lower accuracy, XGBoost's performance is marginally better (0.9564 vs 0.9553) and critically, it achieved the lowest number of False Negatives (94). If the client's primary objective is to identify as many actual older homes as possible to avoid missing valuable properties, XGBoost's superior recall (implied by fewer FNs) makes it the most suitable choice. The model is effectively leveraging both dwelling characteristics and specific neighborhood attributes to make highly accurate predictions about a property's age.
+Among the models, the XGBoost Classifier with the merged data is now the strongest recommendation. While Random Forest has a very slightly lower accuracy, XGBoost's performance is marginally better (0.9564 vs 0.9553) and critically, it achieved the lowest number of False Negatives (94). If the client's primary objective is to identify as many actual older homes as possible to avoid missing valuable properties, XGBoost's superior recall (implied by fewer FNs) makes it the most suitable choice. The model is effectively leveraging both dwelling characteristics and specific neighborhood attributes to make highly accurate predictions about a property's age. -->
 
 ```{python}
-# Include and execute your code here
+# # Include and execute your code here
 
-# Load the new dataset
-df_neighborhoods = pd.read_csv('https://github.com/byuidatascience/data4dwellings/raw/master/data-raw/dwellings_neighborhoods_ml/dwellings_neighborhoods_ml.csv')
+# # Load the new dataset
+# df_neighborhoods = pd.read_csv('https://github.com/byuidatascience/data4dwellings/raw/master/data-raw/dwellings_neighborhoods_ml/dwellings_neighborhoods_ml.csv')
 
-for col in df_neighborhoods.select_dtypes(include=['int64']).columns:
-    df_neighborhoods[col] = pd.to_numeric(df_neighborhoods[col], downcast='integer')
-for col in df_neighborhoods.select_dtypes(include=['float64']).columns:
-    df_neighborhoods[col] = pd.to_numeric(df_neighborhoods[col], downcast='float')
+# for col in df_neighborhoods.select_dtypes(include=['int64']).columns:
+#     df_neighborhoods[col] = pd.to_numeric(df_neighborhoods[col], downcast='integer')
+# for col in df_neighborhoods.select_dtypes(include=['float64']).columns:
+#     df_neighborhoods[col] = pd.to_numeric(df_neighborhoods[col], downcast='float')
 
-# Join the two dataframes on 'parcel'
-df_merged = pd.merge(df, df_neighborhoods, on='parcel', how='inner')
+# # Join the two dataframes on 'parcel'
+# df_merged = pd.merge(df, df_neighborhoods, on='parcel', how='inner')
 
-print(f"Original df shape: {df.shape}")
-print(f"Neighborhoods df shape: {df_neighborhoods.shape}")
-print(f"Merged df shape: {df_merged.shape}")
-print("\nMerged DataFrame columns:")
-print(df_merged.columns.tolist())
+# print(f"Original df shape: {df.shape}")
+# print(f"Neighborhoods df shape: {df_neighborhoods.shape}")
+# print(f"Merged df shape: {df_merged.shape}")
+# print("\nMerged DataFrame columns:")
+# print(df_merged.columns.tolist())
 
-# Redefine features (X) and target (y) for the new merged dataset
-# Exclude 'parcel', 'yrbuilt' (original build year), and 'before1980' (the classification target)
-X_merged = df_merged.drop(columns=['parcel', 'yrbuilt', 'before1980'])
-y_merged = df_merged['before1980']
+# # Redefine features (X) and target (y) for the new merged dataset
+# # Exclude 'parcel', 'yrbuilt' (original build year), and 'before1980' (the classification target)
+# X_merged = df_merged.drop(columns=['parcel', 'yrbuilt', 'before1980'])
+# y_merged = df_merged['before1980']
 
-# Identify numerical columns for the new preprocessor
-numerical_cols_merged = X_merged.select_dtypes(include=np.number).columns.tolist()
+# # Identify numerical columns for the new preprocessor
+# numerical_cols_merged = X_merged.select_dtypes(include=np.number).columns.tolist()
 
-preprocessor_merged = ColumnTransformer(
-    transformers=[
-        ('scaler', StandardScaler(), numerical_cols_merged)
-    ])
+# preprocessor_merged = ColumnTransformer(
+#     transformers=[
+#         ('scaler', StandardScaler(), numerical_cols_merged)
+#     ])
 
-# Split data into training and testing sets for the merged data
-X_train_merged, X_test_merged, y_train_merged, y_test_merged = train_test_split(
-    X_merged, y_merged, test_size=0.2, random_state=42, stratify=y_merged)
+# # Split data into training and testing sets for the merged data
+# X_train_merged, X_test_merged, y_train_merged, y_test_merged = train_test_split(
+#     X_merged, y_merged, test_size=0.2, random_state=42, stratify=y_merged)
 
-# --- REPEAT MODEL TRAINING AND EVALUATION FOR MERGED DATA ---
-n_jobs_setting = 1
+# # --- REPEAT MODEL TRAINING AND EVALUATION FOR MERGED DATA ---
+# n_jobs_setting = 1
 
-print("\n--- Model Comparisons with Merged Data ---")
+# print("\n--- Model Comparisons with Merged Data ---")
 
-# --- Model 1: Logistic Regression (Merged Data) ---
-print("\n--- Logistic Regression (Merged Data) ---")
-pipeline_lr_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
-                              ('classifier', LogisticRegression(random_state=42, solver='liblinear'))])
-pipeline_lr_merged.fit(X_train_merged, y_train_merged)
-y_pred_lr_merged = pipeline_lr_merged.predict(X_test_merged)
-accuracy_lr_merged = accuracy_score(y_test_merged, y_pred_lr_merged)
-print(f"Accuracy: {accuracy_lr_merged:.4f}")
-conf_matrix_lr_merged = confusion_matrix(y_test_merged, y_pred_lr_merged)
-print("\nConfusion Matrix (LR Merged):")
-print(conf_matrix_lr_merged)
-plt.figure(figsize=(6, 5))
-sns.heatmap(conf_matrix_lr_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
-            xticklabels=['Predicted 0', 'Predicted 1'],
-            yticklabels=['Actual 0', 'Actual 1'])
-plt.title('Confusion Matrix for Logistic Regression (Merged Data)')
-plt.xlabel('Predicted Label')
-plt.ylabel('True Label')
-plt.show()
+# # --- Model 1: Logistic Regression (Merged Data) ---
+# print("\n--- Logistic Regression (Merged Data) ---")
+# pipeline_lr_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
+#                               ('classifier', LogisticRegression(random_state=42, solver='liblinear'))])
+# pipeline_lr_merged.fit(X_train_merged, y_train_merged)
+# y_pred_lr_merged = pipeline_lr_merged.predict(X_test_merged)
+# accuracy_lr_merged = accuracy_score(y_test_merged, y_pred_lr_merged)
+# print(f"Accuracy: {accuracy_lr_merged:.4f}")
+# conf_matrix_lr_merged = confusion_matrix(y_test_merged, y_pred_lr_merged)
+# print("\nConfusion Matrix (LR Merged):")
+# print(conf_matrix_lr_merged)
+# plt.figure(figsize=(6, 5))
+# sns.heatmap(conf_matrix_lr_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
+#             xticklabels=['Predicted 0', 'Predicted 1'],
+#             yticklabels=['Actual 0', 'Actual 1'])
+# plt.title('Confusion Matrix for Logistic Regression (Merged Data)')
+# plt.xlabel('Predicted Label')
+# plt.ylabel('True Label')
+# plt.show()
 
-feature_names_out_merged = pipeline_lr_merged.named_steps['preprocessor'].get_feature_names_out()
-coefficients_merged = pipeline_lr_merged.named_steps['classifier'].coef_[0]
-lr_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': abs(coefficients_merged)})
-lr_feature_importance_merged = lr_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
-print("\nTop 10 Feature Importance (Logistic Regression - Merged Data):")
-print(lr_feature_importance_merged)
-plt.figure(figsize=(10, 6))
-sns.barplot(x='Importance', y='Feature', data=lr_feature_importance_merged, palette='viridis')
-plt.title('Top 10 Feature Importance (Logistic Regression - Merged Data)')
-plt.xlabel('Absolute Coefficient Value')
-plt.ylabel('Feature')
-plt.show()
-
-
-# --- Model 2: Random Forest Classifier (Merged Data) ---
-print("\n--- Random Forest Classifier (Merged Data) ---")
-pipeline_rf_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
-                              ('classifier', RandomForestClassifier(random_state=42))])
-param_grid_rf = {
-    'classifier__n_estimators': [100, 200],
-    'classifier__max_depth': [10, 20],
-    'classifier__min_samples_split': [2, 5]
-}
-grid_search_rf_merged = GridSearchCV(pipeline_rf_merged, param_grid_rf, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
-grid_search_rf_merged.fit(X_train_merged, y_train_merged)
-y_pred_rf_merged = grid_search_rf_merged.predict(X_test_merged)
-accuracy_rf_merged = accuracy_score(y_test_merged, y_pred_rf_merged)
-print(f"Best Parameters (RF Merged): {grid_search_rf_merged.best_params_}")
-print(f"Accuracy: {accuracy_rf_merged:.4f}")
-conf_matrix_rf_merged = confusion_matrix(y_test_merged, y_pred_rf_merged)
-print("\nConfusion Matrix (RF Merged):")
-print(conf_matrix_rf_merged)
-plt.figure(figsize=(6, 5))
-sns.heatmap(conf_matrix_rf_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
-            xticklabels=['Predicted 0', 'Predicted 1'],
-            yticklabels=['Actual 0', 'Actual 1'])
-plt.title('Confusion Matrix for Random Forest (Merged Data)')
-plt.xlabel('Predicted Label')
-plt.ylabel('True Label')
-plt.show()
-
-best_rf_model_merged = grid_search_rf_merged.best_estimator_.named_steps['classifier']
-rf_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': best_rf_model_merged.feature_importances_})
-rf_feature_importance_merged = rf_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
-print("\nTop 10 Feature Importance (Random Forest - Merged Data):")
-print(rf_feature_importance_merged)
-plt.figure(figsize=(10, 6))
-sns.barplot(x='Importance', y='Feature', data=rf_feature_importance_merged, palette='viridis')
-plt.title('Top 10 Feature Importance (Random Forest - Merged Data)')
-plt.xlabel('Importance')
-plt.ylabel('Feature')
-plt.show()
+# feature_names_out_merged = pipeline_lr_merged.named_steps['preprocessor'].get_feature_names_out()
+# coefficients_merged = pipeline_lr_merged.named_steps['classifier'].coef_[0]
+# lr_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': abs(coefficients_merged)})
+# lr_feature_importance_merged = lr_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
+# print("\nTop 10 Feature Importance (Logistic Regression - Merged Data):")
+# print(lr_feature_importance_merged)
+# plt.figure(figsize=(10, 6))
+# sns.barplot(x='Importance', y='Feature', data=lr_feature_importance_merged, palette='viridis')
+# plt.title('Top 10 Feature Importance (Logistic Regression - Merged Data)')
+# plt.xlabel('Absolute Coefficient Value')
+# plt.ylabel('Feature')
+# plt.show()
 
 
-# --- Model 3: XGBoost Classifier (Merged Data) ---
-print("\n--- XGBoost Classifier (Merged Data) ---")
-pipeline_xgb_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
-                               ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))])
-param_grid_xgb = {
-    'classifier__n_estimators': [100, 200],
-    'classifier__learning_rate': [0.05, 0.1],
-    'classifier__max_depth': [3, 5],
-    'classifier__subsample': [0.8, 1.0],
-    'classifier__colsample_bytree': [0.8, 1.0]
-}
-grid_search_xgb_merged = GridSearchCV(pipeline_xgb_merged, param_grid_xgb, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
-grid_search_xgb_merged.fit(X_train_merged, y_train_merged)
-y_pred_xgb_merged = grid_search_xgb_merged.predict(X_test_merged)
-accuracy_xgb_merged = accuracy_score(y_test_merged, y_pred_xgb_merged)
-print(f"Best Parameters (XGBoost Merged): {grid_search_xgb_merged.best_params_}")
-print(f"Accuracy: {accuracy_xgb_merged:.4f}")
-conf_matrix_xgb_merged = confusion_matrix(y_test_merged, y_pred_xgb_merged)
-print("\nConfusion Matrix (XGBoost Merged):")
-print(conf_matrix_xgb_merged)
-plt.figure(figsize=(6, 5))
-sns.heatmap(conf_matrix_xgb_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
-            xticklabels=['Predicted 0', 'Predicted 1'],
-            yticklabels=['Actual 0', 'Actual 1'])
-plt.title('Confusion Matrix for XGBoost (Merged Data)')
-plt.xlabel('Predicted Label')
-plt.ylabel('True Label')
-plt.show()
+# # --- Model 2: Random Forest Classifier (Merged Data) ---
+# print("\n--- Random Forest Classifier (Merged Data) ---")
+# pipeline_rf_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
+#                               ('classifier', RandomForestClassifier(random_state=42))])
+# param_grid_rf = {
+#     'classifier__n_estimators': [100, 200],
+#     'classifier__max_depth': [10, 20],
+#     'classifier__min_samples_split': [2, 5]
+# }
+# grid_search_rf_merged = GridSearchCV(pipeline_rf_merged, param_grid_rf, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
+# grid_search_rf_merged.fit(X_train_merged, y_train_merged)
+# y_pred_rf_merged = grid_search_rf_merged.predict(X_test_merged)
+# accuracy_rf_merged = accuracy_score(y_test_merged, y_pred_rf_merged)
+# print(f"Best Parameters (RF Merged): {grid_search_rf_merged.best_params_}")
+# print(f"Accuracy: {accuracy_rf_merged:.4f}")
+# conf_matrix_rf_merged = confusion_matrix(y_test_merged, y_pred_rf_merged)
+# print("\nConfusion Matrix (RF Merged):")
+# print(conf_matrix_rf_merged)
+# plt.figure(figsize=(6, 5))
+# sns.heatmap(conf_matrix_rf_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
+#             xticklabels=['Predicted 0', 'Predicted 1'],
+#             yticklabels=['Actual 0', 'Actual 1'])
+# plt.title('Confusion Matrix for Random Forest (Merged Data)')
+# plt.xlabel('Predicted Label')
+# plt.ylabel('True Label')
+# plt.show()
 
-best_xgb_model_merged = grid_search_xgb_merged.best_estimator_.named_steps['classifier']
-xgb_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': best_xgb_model_merged.feature_importances_})
-xgb_feature_importance_merged = xgb_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
-print("\nTop 10 Feature Importance (XGBoost - Merged Data):")
-print(xgb_feature_importance_merged)
-plt.figure(figsize=(10, 6))
-sns.barplot(x='Importance', y='Feature', data=xgb_feature_importance_merged, palette='viridis')
-plt.title('Top 10 Feature Importance (XGBoost - Merged Data)')
-plt.xlabel('Importance')
-plt.ylabel('Feature')
-plt.show()
-
-```
+# best_rf_model_merged = grid_search_rf_merged.best_estimator_.named_steps['classifier']
+# rf_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': best_rf_model_merged.feature_importances_})
+# rf_feature_importance_merged = rf_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
+# print("\nTop 10 Feature Importance (Random Forest - Merged Data):")
+# print(rf_feature_importance_merged)
+# plt.figure(figsize=(10, 6))
+# sns.barplot(x='Importance', y='Feature', data=rf_feature_importance_merged, palette='viridis')
+# plt.title('Top 10 Feature Importance (Random Forest - Merged Data)')
+# plt.xlabel('Importance')
+# plt.ylabel('Feature')
+# plt.show()
 
 
-## STRETCH QUESTION|TASK 3
+# # --- Model 3: XGBoost Classifier (Merged Data) ---
+# print("\n--- XGBoost Classifier (Merged Data) ---")
+# pipeline_xgb_merged = Pipeline(steps=[('preprocessor', preprocessor_merged),
+#                                ('classifier', XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'))])
+# param_grid_xgb = {
+#     'classifier__n_estimators': [100, 200],
+#     'classifier__learning_rate': [0.05, 0.1],
+#     'classifier__max_depth': [3, 5],
+#     'classifier__subsample': [0.8, 1.0],
+#     'classifier__colsample_bytree': [0.8, 1.0]
+# }
+# grid_search_xgb_merged = GridSearchCV(pipeline_xgb_merged, param_grid_xgb, cv=3, scoring='accuracy', n_jobs=n_jobs_setting, verbose=0)
+# grid_search_xgb_merged.fit(X_train_merged, y_train_merged)
+# y_pred_xgb_merged = grid_search_xgb_merged.predict(X_test_merged)
+# accuracy_xgb_merged = accuracy_score(y_test_merged, y_pred_xgb_merged)
+# print(f"Best Parameters (XGBoost Merged): {grid_search_xgb_merged.best_params_}")
+# print(f"Accuracy: {accuracy_xgb_merged:.4f}")
+# conf_matrix_xgb_merged = confusion_matrix(y_test_merged, y_pred_xgb_merged)
+# print("\nConfusion Matrix (XGBoost Merged):")
+# print(conf_matrix_xgb_merged)
+# plt.figure(figsize=(6, 5))
+# sns.heatmap(conf_matrix_xgb_merged, annot=True, fmt='d', cmap='Blues', cbar=False,
+#             xticklabels=['Predicted 0', 'Predicted 1'],
+#             yticklabels=['Actual 0', 'Actual 1'])
+# plt.title('Confusion Matrix for XGBoost (Merged Data)')
+# plt.xlabel('Predicted Label')
+# plt.ylabel('True Label')
+# plt.show()
 
-__Can you build a model that predicts the year a house was built?__ Explain the model and the evaluation metrics you would use to determine if the model is good.  
+# best_xgb_model_merged = grid_search_xgb_merged.best_estimator_.named_steps['classifier']
+# xgb_feature_importance_merged = pd.DataFrame({'Feature': feature_names_out_merged, 'Importance': best_xgb_model_merged.feature_importances_})
+# xgb_feature_importance_merged = xgb_feature_importance_merged.sort_values(by='Importance', ascending=False).head(10)
+# print("\nTop 10 Feature Importance (XGBoost - Merged Data):")
+# print(xgb_feature_importance_merged)
+# plt.figure(figsize=(10, 6))
+# sns.barplot(x='Importance', y='Feature', data=xgb_feature_importance_merged, palette='viridis')
+# plt.title('Top 10 Feature Importance (XGBoost - Merged Data)')
+# plt.xlabel('Importance')
+# plt.ylabel('Feature')
+# plt.show()
 
-_type your results and analysis here_
-
-```{python}
-# Include and execute your code here
+# ```
 
 
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+# ## STRETCH QUESTION|TASK 3
 
-print("\n--- Model to Predict Year Built (Regression) ---")
+# __Can you build a model that predicts the year a house was built?__ Explain the model and the evaluation metrics you would use to determine if the model is good.  
 
-# Define features (X_year) and target (y_year) for predicting 'yrbuilt'
-# Exclude 'parcel', 'before1980' (the previous classification target),
-# and 'yrbuilt' (the new regression target itself from X)
-X_year = df.drop(columns=['parcel', 'yrbuilt', 'before1980'])
-y_year = df['yrbuilt'] # New target for regression
+# _type your results and analysis here_
 
-# The preprocessor structure remains similar, focusing on numerical columns
-numerical_cols_year = X_year.select_dtypes(include=np.number).columns.tolist()
-preprocessor_year = ColumnTransformer(
-    transformers=[
-        ('scaler', StandardScaler(), numerical_cols_year)
-    ])
+# ```{python}
+# # Include and execute your code here
 
-# Split data for regression model
-X_train_year, X_test_year, y_train_year, y_test_year = train_test_split(
-    X_year, y_year, test_size=0.2, random_state=42)
 
-# --- Regression Model: XGBoost Regressor ---
-# XGBoost is a powerful choice for many regression tasks too.
-print("\n--- XGBoost Regressor for Year Built ---")
-n_jobs_setting = 1 
+# from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-pipeline_xgb_reg = Pipeline(steps=[('preprocessor', preprocessor_year),
-                                    ('regressor', XGBRegressor(random_state=42, n_jobs=n_jobs_setting))])
+# print("\n--- Model to Predict Year Built (Regression) ---")
 
-# Define parameter grid for XGBoost Regressor
-# GridSearchCV uses 'neg_mean_absolute_error' because it's a 'scorer' that GridSearchCV tries to maximize.
-param_grid_xgb_reg = {
-    'regressor__n_estimators': [100, 200],
-    'regressor__learning_rate': [0.05, 0.1],
-    'regressor__max_depth': [3, 5]
-}
+# # Define features (X_year) and target (y_year) for predicting 'yrbuilt'
+# # Exclude 'parcel', 'before1980' (the previous classification target),
+# # and 'yrbuilt' (the new regression target itself from X)
+# X_year = df.drop(columns=['parcel', 'yrbuilt', 'before1980'])
+# y_year = df['yrbuilt'] # New target for regression
 
-grid_search_xgb_reg = GridSearchCV(pipeline_xgb_reg, param_grid_xgb_reg, cv=3, scoring='neg_mean_absolute_error', n_jobs=n_jobs_setting, verbose=0)
-grid_search_xgb_reg.fit(X_train_year, y_train_year)
+# # The preprocessor structure remains similar, focusing on numerical columns
+# numerical_cols_year = X_year.select_dtypes(include=np.number).columns.tolist()
+# preprocessor_year = ColumnTransformer(
+#     transformers=[
+#         ('scaler', StandardScaler(), numerical_cols_year)
+#     ])
 
-best_xgb_reg_model = grid_search_xgb_reg.best_estimator_
-y_pred_xgb_reg = best_xgb_reg_model.predict(X_test_year)
+# # Split data for regression model
+# X_train_year, X_test_year, y_train_year, y_test_year = train_test_split(
+#     X_year, y_year, test_size=0.2, random_state=42)
 
-# Evaluate the regression model using appropriate metrics
-mae_xgb_reg = mean_absolute_error(y_test_year, y_pred_xgb_reg)
-mse_xgb_reg = mean_squared_error(y_test_year, y_pred_xgb_reg)
-rmse_xgb_reg = np.sqrt(mse_xgb_reg) # RMSE is often preferred as it's in the original units and penalizes large errors more.
-r2_xgb_reg = r2_score(y_test_year, y_pred_xgb_reg)
+# # --- Regression Model: XGBoost Regressor ---
+# # XGBoost is a powerful choice for many regression tasks too.
+# print("\n--- XGBoost Regressor for Year Built ---")
+# n_jobs_setting = 1 
 
-print(f"XGBoost Regressor Best Parameters: {grid_search_xgb_reg.best_params_}")
-print(f"Mean Absolute Error (MAE): {mae_xgb_reg:.2f} years")
-print(f"Root Mean Squared Error (RMSE): {rmse_xgb_reg:.2f} years")
-print(f"R-squared (R2): {r2_xgb_reg:.4f}")
+# pipeline_xgb_reg = Pipeline(steps=[('preprocessor', preprocessor_year),
+#                                     ('regressor', XGBRegressor(random_state=42, n_jobs=n_jobs_setting))])
 
-# Plotting predicted vs actual values for visual assessment
-plt.figure(figsize=(10, 6))
-plt.scatter(y_test_year, y_pred_xgb_reg, alpha=0.3)
-plt.plot([y_test_year.min(), y_test_year.max()], [y_test_year.min(), y_test_year.max()], 'r--', lw=2, label='Perfect Prediction')
-plt.xlabel('Actual Year Built')
-plt.ylabel('Predicted Year Built')
-plt.title('Actual vs. Predicted Year Built (XGBoost Regressor)')
-plt.grid(True)
-plt.legend()
-plt.show()
+# # Define parameter grid for XGBoost Regressor
+# # GridSearchCV uses 'neg_mean_absolute_error' because it's a 'scorer' that GridSearchCV tries to maximize.
+# param_grid_xgb_reg = {
+#     'regressor__n_estimators': [100, 200],
+#     'regressor__learning_rate': [0.05, 0.1],
+#     'regressor__max_depth': [3, 5]
+# }
+
+# grid_search_xgb_reg = GridSearchCV(pipeline_xgb_reg, param_grid_xgb_reg, cv=3, scoring='neg_mean_absolute_error', n_jobs=n_jobs_setting, verbose=0)
+# grid_search_xgb_reg.fit(X_train_year, y_train_year)
+
+# best_xgb_reg_model = grid_search_xgb_reg.best_estimator_
+# y_pred_xgb_reg = best_xgb_reg_model.predict(X_test_year)
+
+# # Evaluate the regression model using appropriate metrics
+# mae_xgb_reg = mean_absolute_error(y_test_year, y_pred_xgb_reg)
+# mse_xgb_reg = mean_squared_error(y_test_year, y_pred_xgb_reg)
+# rmse_xgb_reg = np.sqrt(mse_xgb_reg) # RMSE is often preferred as it's in the original units and penalizes large errors more.
+# r2_xgb_reg = r2_score(y_test_year, y_pred_xgb_reg)
+
+# print(f"XGBoost Regressor Best Parameters: {grid_search_xgb_reg.best_params_}")
+# print(f"Mean Absolute Error (MAE): {mae_xgb_reg:.2f} years")
+# print(f"Root Mean Squared Error (RMSE): {rmse_xgb_reg:.2f} years")
+# print(f"R-squared (R2): {r2_xgb_reg:.4f}")
+
+# # Plotting predicted vs actual values for visual assessment
+# plt.figure(figsize=(10, 6))
+# plt.scatter(y_test_year, y_pred_xgb_reg, alpha=0.3)
+# plt.plot([y_test_year.min(), y_test_year.max()], [y_test_year.min(), y_test_year.max()], 'r--', lw=2, label='Perfect Prediction')
+# plt.xlabel('Actual Year Built')
+# plt.ylabel('Predicted Year Built')
+# plt.title('Actual vs. Predicted Year Built (XGBoost Regressor)')
+# plt.grid(True)
+# plt.legend()
+# plt.show()
  
 
 ```
