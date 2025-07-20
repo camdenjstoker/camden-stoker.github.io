@@ -23,8 +23,8 @@ website:
         file: index.qmd
       - text: "My Resume"
         file: resume.qmd
-      - text: "Data Cleansing"
-        file: cleansing.qmd
+      # - text: "Data Cleansing"
+      #   file: cleansing.qmd
       # - text: "Data Exploration"
       #   file: exploration.qmd
       - text: "Story Telling"
@@ -39,17 +39,17 @@ website:
   # learn more about navication here https://quarto.org/docs/websites/website-navigation.html
   # comment out any of the sections below to turn off the sidebar
 
-  sidebar: 
-    - title: "Data Cleansing"
-      style: "docked"
-      background: light
-      contents:
-        - text: "Data Cleansing"
-          file: cleansing.qmd
-        - text: "---"
-        - text: "Project 1"
-          file: Cleansing_Projects/project1.qmd
-        - text: "---"
+  # sidebar: 
+  #   - title: "Data Cleansing"
+  #     style: "docked"
+  #     background: light
+  #     contents:
+  #       - text: "Data Cleansing"
+  #         file: cleansing.qmd
+  #       - text: "---"
+  #       - text: "Project 1"
+  #         file: Cleansing_Projects/project1.qmd
+  #       - text: "---"
         # - text: "Project 2"
         #   file: Cleansing_Projects/project2.qmd
         # - text: "---"
