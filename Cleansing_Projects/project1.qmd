@@ -1,4 +1,4 @@
----
+<!-- ---
 title: "Client Report - The War with Star Wars"
 subtitle: "Course DS 250"
 author: "Camden Stoker"
@@ -508,4 +508,4 @@ else:
 
 ```
 
----
+--- -->
