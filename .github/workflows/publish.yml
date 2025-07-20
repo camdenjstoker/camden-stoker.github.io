@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write # Added pull-requests permission as it's often useful for publishing
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -19,36 +17,32 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
         with:
-          # To install LaTeX to build PDF book
-          tinytex: true
-
+          # To install LaTeX to build PDF book 
+          tinytex: true 
+      
       # Comment out the below section if you are not using python
       - name: Install Python and Dependencies
         uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.12'
-          cache: 'pip' # Corrected: 'cache' should be under 'with'
-
-      - run: |
-          pip install -r requirements.txt # This should ideally be run before the above if requirements.txt lists most packages
-          pip install jupyter numpy pandas scikit-learn lets-plot palmerpenguins seaborn matplotlib plotly.express altair altair_viewer nbformat nbclient pyyaml tabulate # tabulate included here
-          pip install tabulate
-                                           # Consider consolidating all pip installs or ensuring order for dependencies
+          #cache: 'pip'
+      - run: pip install jupyter numpy pandas scikit-learn lets-plot palmerpenguins seaborn matplotlib plotly.express #altair altair_viewer # nbformat nbclient pyyaml
+      #- run: pip install -r requirements.txt
 
       # # Comment out the 2 below section if you are not using R
-    #   - name: Install R
-    #     uses: r-lib/actions/setup-r@v2
-    #     with:
-    #       #r-version: '4.3.2'
-    #       use-public-rspm: true
+      # - name: Install R
+      #   uses: r-lib/actions/setup-r@v2
+      #   with:
+      #     #r-version: '4.3.2'
+      #     use-public-rspm: true
 
-    #   - name: Install R Dependencies
-    #     uses: r-lib/actions/setup-r-dependencies@v2
-    #     with:
-    #       packages:
-    #         - any::tidyverse # Corrected list format
-    #         - any::knitr
-    #         - any::DT
+      # - name: Install R Dependencies
+      #   uses: r-lib/actions/setup-r-dependencies@v2
+      #   with:
+      #     packages: 
+      #       any::tidyverse
+      #       any::knitr
+      #       any::DT
 
       - name: Render resume.qmd to PDF
         run: quarto render resume.qmd --to pdf
